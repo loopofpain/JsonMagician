@@ -1,125 +1,78 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// Copyright (c) Nate McMaster.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using LoopOfPain.JsonMagician.Cli.Properties;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using McMaster.Extensions.CommandLineUtils;
 
-Console.WriteLine("Hello, World!");
-
-using MemoryStream inputFileMemoryStream = new MemoryStream(Resources.some_config_file);
-using StreamReader inputFileStreamReader = new StreamReader(inputFileMemoryStream);
-
-var config = inputFileStreamReader.ReadToEnd();
-var data = (JObject)JsonConvert.DeserializeObject(config);
-
-var objectsInJsonFile = data.Children().ToList();
-
-var tokensAsDictionary = ConvertJsonTokensToDictionary(objectsInJsonFile);
-
-var cleanDictionary = CleanKeysOfDictionary(tokensAsDictionary);
-
-var resultDictionary = JsonConvert.SerializeObject(cleanDictionary);
-
-config += "hi";
-
-IDictionary<string, object?> CleanKeysOfDictionary(Dictionary<string, object?> data)
+namespace LoopOfPain.JsonMagician.Cli
 {
-    var values = new SortedDictionary<string, object?>();
-
-    foreach (var item in data)
+    [Command(Name = "json-magican", Description = "Placeholder"),
+     Subcommand(typeof(ConvertCommand))]
+    class CliRoot
     {
-        var currentKey = item.Key + "";
-        currentKey = currentKey.Replace("[", "__").Replace("].", "__").Replace("]", "");
+        public static void Main(string[] args) => CommandLineApplication.Execute<CliRoot>(args);
 
-        var splitted = currentKey.Split(".");
-        var joined = string.Join("__", splitted);
-
-        values.Add(joined, item.Value);
-    }
-
-    return values;
-}
-
-Dictionary<string, object?> ConvertJsonTokensToDictionary(IList<JToken> jToken)
-{
-    var children = jToken?.Count > 0 ? jToken.Children().ToList() : new List<JToken>();
-
-    var parsedTokens = new Dictionary<string, object?>();
-
-    foreach (var child in children)
-    {
-        var parsedTokensFromChild = ConvertSingleTokenToDictionary(child);
-        AddToDictionary<string, object?>(ref parsedTokens, parsedTokensFromChild);
-    }
-
-    return parsedTokens;
-}
-
-static void AddToDictionary<TKey, TValue>(ref Dictionary<TKey, TValue> source, Dictionary<TKey, TValue> collection)
-{
-    if (collection == null)
-    {
-        throw new ArgumentNullException("Collection is null");
-    }
-
-    foreach (var item in collection)
-    {
-        if (!source.ContainsKey(item.Key))
+        private int OnExecute(CommandLineApplication app, IConsole console)
         {
-            source.Add(item.Key, item.Value);
+            console.WriteLine("You must specify at a subcommand.");
+            app.ShowHelp();
+            return 1;
         }
-    }
-}
+
+        [Command("convert", Description = "Placeholder"),
+         Subcommand(typeof(FlattenJson))]
+        private class ConvertCommand
+        {
+            private int OnExecute(IConsole console)
+            {
+                console.Error.WriteLine("You must specify an action. See --help for more details.");
+                return 1;
+            }
+        }
+
+        [Command("flatten", Description = "Placeholder",
+    AllowArgumentSeparator = true,
+    UnrecognizedArgumentHandling = UnrecognizedArgumentHandling.StopParsingAndCollect)]
+        private class FlattenJson
+        {
+            [Required(ErrorMessage = "Placeholder")]
+            [Argument(0, Description = "Path to input .json file")]
+            public string PathToInputJsonFile { get; }
+
+            [Required(ErrorMessage = "Placeholder")]
+            [Argument(1, Description = "Path to output file")]
+            public string PathToOutputFile { get; }
+
+            /// <summary>
+            /// When UnrecognizedArgumentHandling is StopParsingAndCollect, any unrecognized arguments
+            /// will be collected and set in this property, when set.
+            /// </summary>
+            public string[] RemainingArguments { get; }
+
+            private int OnExecute(IConsole console)
+            {
+                if (!File.Exists(PathToInputJsonFile))
+                {
+                    console.Error.WriteLine($"Input file '{PathToInputJsonFile}' does not exist!");
+                    return 1;
+                }
 
 
-Dictionary<string, object?> ConvertSingleTokenToDictionary(JToken jToken)
-{
-    var values = new Dictionary<string, object?>();
+                var outPutPath = Path.GetDirectoryName(PathToOutputFile);
 
-    if (jToken is null)
-    {
-        return values;
-    }
+                if (!string.IsNullOrEmpty(outPutPath))
+                {
+                    Directory.CreateDirectory(outPutPath);
+                }
 
-    var tokens = jToken.HasValues ? jToken.Children().ToList() : new List<JToken>();
+                using var inputFileStreamReader = new StreamReader(PathToInputJsonFile);
+                var fileAsString = inputFileStreamReader.ReadToEnd();
 
-    if (!tokens!.Any())
-    {
-        values.Add(jToken!.Path, jToken?.Value<object>());
-        return values;
-    }
-
-    foreach (var token in tokens)
-    {
-        InnerTraverse(token, ref values);
-    }
-
-    return values;
-}
-
-static void InnerTraverse(JToken jToken, ref Dictionary<string, object?> dictionary)
-{
-    if (jToken is null)
-    {
-        return;
-    }
-
-    if (dictionary is null)
-    {
-        throw new ArgumentNullException(nameof(dictionary));
-    }
-
-    var tokens = jToken.HasValues ? jToken.Children().ToList() : new List<JToken>();
-
-    if (!tokens.Any())
-    {
-        dictionary.Add(jToken.Path, jToken.Value<object>());
-        return;
-    }
-
-    foreach (var token in tokens)
-    {
-        InnerTraverse(token, ref dictionary);
+                return 0;
+            }
+        }
     }
 }
