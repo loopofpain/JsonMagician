@@ -1,0 +1,32 @@
+﻿{
+    "Serilog": {
+        "Using": [ "Serilog.Sinks.Literate" ],
+        "MinimumLevel": "Debug",
+        "WriteTo": [
+            {
+                "Name": "File",
+                "Args": { "path": "%TEMP%\\Logs\\serilog-configuration-sample.txt" }
+            }
+        ],
+        "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
+        "Properties": {
+            "Application": "Sample"
+        }
+    },
+    "Test": {
+        "EmptyArr": [],
+        "NullVal": null,
+        "Boolean": true,
+        "RandomNumber": 12345,
+        "ObjArray": [
+            {
+                "name": "Max",
+                "age": 17
+            },
+            {
+                "name": "Eve",
+                "age": 21
+            }
+        ]
+    }
+}
