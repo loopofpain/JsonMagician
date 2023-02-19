@@ -7,6 +7,9 @@
     "Convert Test-File": {
       "commandName": "Project",
       "commandLineArgs": "convert flatten \"C:\\gitshit\\JsonMagician\\src\\.test-files\\some-config-file.json\" \"C:\\gitshit\\JsonMagician\\src\\LoopOfPain.JsonMagician.Cli\\bin\\flattened-output\\file.json\""
+    },
+    "Docker": {
+      "commandName": "Docker"
     }
   }
 }
