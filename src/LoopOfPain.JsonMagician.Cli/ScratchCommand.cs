@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using McMaster.Extensions.CommandLineUtils;
 
 using Newtonsoft.Json.Linq;
 
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
-using System.Security.Cryptography.X509Certificates;
 using System.Reflection;
 using System.Dynamic;
 
@@ -69,27 +63,35 @@ namespace LoopOfPain.JsonMagician.Cli
 
             foreach (var item in allKeys)
             {
-                var regex = new Regex("__(\\d+)$");
+                var regex = new Regex("(__\\d)");
                 var isArrayElement = regex.Matches(item);
                 var isMatch = regex.IsMatch(item);
                 var regexParsedContent = isArrayElement.Select(x => x.ToString()).ToList();
-                var keySplittedByArrayStart = isMatch ? item.Split(regexParsedContent[0]) : new string[] {};
+                // Loop through elements
+                var keySplittedByArrayStart = isMatch ? item.Split(regexParsedContent[0]) : Array.Empty<string>();
                 var keySegments = keySplittedByArrayStart.Any() ? keySplittedByArrayStart[0].Split("__") : item.Split("__");
 
                 var outputObjectReference = outputObject;
 
-                for (int i = 0; i < keySegments.Length; i++)
+                for (var segmentIndex = 0; segmentIndex < keySegments.Length; segmentIndex++)
                 {
-                    var nameOfProperty = keySegments[i];
+                    var nameOfProperty = keySegments[segmentIndex];
+
+                    // Debug
+                    if(nameOfProperty.Contains("Write") || regexParsedContent.Count > 1)
+                    {
+                        var here = 0;
+                    }
+
                     if (!PropertyExists(outputObjectReference, nameOfProperty))
                     {
-                        if (isMatch && i == (keySegments.Length - 1))
+                        if (isMatch && segmentIndex == (keySegments.Length - 1))
                         {
                             outputObjectReference.Add(nameOfProperty, new List<object>());
                             (outputObjectReference[nameOfProperty] as List<object>).Add(parsed[item]);
 
                             
-                        }else if (!isMatch && i == (keySegments.Length - 1))
+                        }else if (!isMatch && segmentIndex == (keySegments.Length - 1))
                         {
                             outputObjectReference.Add(nameOfProperty, parsed[item]);
                         }
@@ -102,7 +104,7 @@ namespace LoopOfPain.JsonMagician.Cli
                     }
                     else
                     {
-                        if (isMatch && i == (keySegments.Length - 1))
+                        if (isMatch && segmentIndex == (keySegments.Length - 1))
                         {
                             if (outputObjectReference[nameOfProperty] is List<object>)
                             {
@@ -118,6 +120,10 @@ namespace LoopOfPain.JsonMagician.Cli
             }
 
             var flattenedJsonText = JsonConvert.SerializeObject(outputObject, Formatting.Indented);
+
+            File.WriteAllText(PathToOutputFile, flattenedJsonText);
+
+            console.Out.WriteLine($"File was created at '{PathToOutputFile}'");
 
             //console.Out.WriteLine("Json file was read!");
 
@@ -138,7 +144,7 @@ namespace LoopOfPain.JsonMagician.Cli
 
         private static void SetObjectProperty(string propertyName, string value, object obj)
         {
-            PropertyInfo propertyInfo = obj.GetType().GetProperty(propertyName);
+            var propertyInfo = obj.GetType().GetProperty(propertyName);
             // make sure object has the property we are after
             if (propertyInfo != null)
             {
@@ -148,7 +154,11 @@ namespace LoopOfPain.JsonMagician.Cli
 
         public static bool PropertyExists(dynamic obj, string name)
         {
-            if (obj == null) return false;
+            if (obj == null)
+            {
+                return false;
+            }
+
             if (obj is IDictionary<string, object> dict)
             {
                 return dict.ContainsKey(name);
