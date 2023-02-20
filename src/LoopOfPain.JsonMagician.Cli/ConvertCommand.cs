@@ -10,7 +10,8 @@ namespace LoopOfPain.JsonMagician.Cli
 {
 
     [Command("convert", Description = "Placeholder"),
-     Subcommand(typeof(FlattenJsonCommand))]
+     Subcommand(typeof(FlattenJsonCommand),
+                typeof(ScratchCommand))]
     internal class ConvertCommand
     {
         private int OnExecute(IConsole console)

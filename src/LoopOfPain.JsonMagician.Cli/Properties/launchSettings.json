@@ -4,12 +4,16 @@
       "commandName": "WSL2",
       "distributionName": ""
     },
-    "Convert Test-File": {
+    "Docker": {
+      "commandName": "Docker"
+    },
+    "Flatten": {
       "commandName": "Project",
       "commandLineArgs": "convert flatten \"C:\\gitshit\\JsonMagician\\src\\.test-files\\some-config-file.json\" \"C:\\gitshit\\JsonMagician\\src\\LoopOfPain.JsonMagician.Cli\\bin\\flattened-output\\file.json\""
     },
-    "Docker": {
-      "commandName": "Docker"
+    "Scratch": {
+      "commandName": "Project",
+      "commandLineArgs": "convert scratch \"C:\\gitshit\\JsonMagician\\src\\.test-files\\flattened-json.json\" \"C:\\gitshit\\JsonMagician\\src\\LoopOfPain.JsonMagician.Cli\\bin\\flattened-output\\scratched-file.json\""
     }
   }
 }

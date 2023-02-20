@@ -1,0 +1,18 @@
+{
+  "Serilog__Enrich__0": "FromLogContext",
+  "Serilog__Enrich__1": "WithMachineName",
+  "Serilog__Enrich__2": "WithThreadId",
+  "Serilog__MinimumLevel": "Debug",
+  "Serilog__Properties__Application": "Sample",
+  "Serilog__Using__0": "Serilog.Sinks.Literate",
+  "Serilog__WriteTo__0__Args__path": "%TEMP%\\Logs\\serilog-configuration-sample.txt",
+  "Serilog__WriteTo__0__Name": "File",
+  "Test__Boolean": true,
+  "Test__EmptyArr": [],
+  "Test__NullVal": null,
+  "Test__ObjArray__0__age": 17,
+  "Test__ObjArray__0__name": "Max",
+  "Test__ObjArray__1__age": 21,
+  "Test__ObjArray__1__name": "Eve",
+  "Test__RandomNumber": 12345
+}
